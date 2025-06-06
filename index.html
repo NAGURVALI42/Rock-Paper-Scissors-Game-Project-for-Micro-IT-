@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rock Paper Scissors Lizard Spock - Ultimate Edition</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary-color: #1e90ff;
+      --hover-color: #63b3ed;
+      --background-start: #0f2027;
+      --background-mid: #203a43;
+      --background-end: #2c5364;
+      --text-color: white;
+      --accent-color: #ffcc00;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, var(--background-start), var(--background-mid), var(--background-end));
+      color: var(--text-color);
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      color: var(--accent-color);
+      text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+    }
+
+    .game-container {
+      background: rgba(0,0,0,0.4);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      max-width: 800px;
+      margin: 20px auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+      padding: 10px;
+    }
+
+    .btn {
+      font-size: 1.8rem;
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid #fff;
+      background-color: var(--primary-color);
+      color: white;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .btn:hover::before {
+      width: 200%;
+      height: 200%;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      background-color: var(--hover-color);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .info {
+      font-size: 1.4rem;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-box {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-box:hover {
+      transform: scale(1.05);
+    }
+
+    .streak, .score {
+      font-weight: bold;
+      color: #00e676;
+      text-shadow: 0 0 5px rgba(0,230,118,0.3);
+    }
+
+    .achievements {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+
+    .achievement-badge {
+      display: inline-block;
+      margin: 5px;
+      padding: 10px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      font-size: 1.5rem;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .achievement-badge.unlocked {
+      opacity: 1;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .game-history {
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+
+    .history-item {
+      padding: 5px;
+      margin: 5px 0;
+      border-radius: 5px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    select {
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      margin-top: 15px;
+      background: rgba(255,255,255,0.1);
+      color: var(--text-color);
+      border: 2px solid var(--primary-color);
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .rules-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 8px 15px;
+      border-radius: 5px;
+      background: var(--primary-color);
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+    }
+
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--background-mid);
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 1.5rem;
+    }
+
+    /* Dark mode styles */
+    .dark-mode {
+      --background-start: #121212;
+      --background-mid: #1e1e1e;
+      --background-end: #2d2d2d;
+      --primary-color: #2196f3;
+      --hover-color: #1976d2;
+    }
+  </style>
+</head>
+<body>
+  <div class="toggle-theme">
+    <label><input type="checkbox" onclick="toggleDarkMode()"> 🌙 Dark Mode</label>
+  </div>
+
+  <button class="rules-btn" onclick="showRules()">Rules</button>
+
+  <h1>Rock Paper Scissors Lizard Spock</h1>
+  <div class="game-container">
+    <label for="rounds">Select Rounds: </label>
+    <select id="rounds">
+      <option value="1">1</option>
+      <option value="3">3</option>
+      <option value="5" selected>5</option>
+      <option value="10">10</option>
+      <option value="15">15</option>
+    </select>
+
+    <div class="choices">
+      <button class="btn" onclick="play('rock')">🪨 Rock</button>
+      <button class="btn" onclick="play('paper')">📄 Paper</button>
+      <button class="btn" onclick="play('scissors')">✂️ Scissors</button>
+      <button class="btn" onclick="play('lizard')">🦎 Lizard</button>
+      <button class="btn" onclick="play('spock')">🖖 Spock</button>
+    </div>
+
+    <div class="info" id="result">Choose your weapon!</div>
+    
+    <div class="stats-container">
+      <div class="stat-box">
+        <div class="score" id="score">You: 0 | Computer: 0</div>
+      </div>
+      <div class="stat-box">
+        <div class="streak" id="streak">🔥 Current Streak: 0</div>
+      </div>
+      <div class="stat-box">
+        <div id="maxStreak">🏆 Best Streak: 0</div>
+      </div>
+    </div>
+
+    <div class="achievements" id="achievements">
+      <h3>Achievements</h3>
+      <div id="achievement-badges"></div>
+    </div>
+
+    <div class="game-history">
+      <h3>Game History</h3>
+      <div id="history"></div>
+    </div>
+  </div>
+
+  <div id="rulesModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="hideRules()">&times;</span>
+      <h2>Game Rules</h2>
+      <p>
+        🪨 Rock crushes Scissors & crushes Lizard<br>
+        📄 Paper covers Rock & disproves Spock<br>
+        ✂️ Scissors cuts Paper & decapitates Lizard<br>
+        🦎 Lizard eats Paper & poisons Spock<br>
+        🖖 Spock smashes Scissors & vaporizes Rock
+      </p>
+    </div>
+  </div>
+
+  <audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2018/win-musical-alert.wav"></audio>
+  <audio id="loseSound" src="https://assets.mixkit.co/active_storage/sfx/2018/lose-musical-alert.wav"></audio>
+  <audio id="drawSound" src="https://assets.mixkit.co/active_storage/sfx/2018/draw-musical-alert.wav"></audio>
+
+  <script>
+    // Game state
+    let userScore = 0;
+    let computerScore = 0;
+    let winStreak = 0;
+    let maxStreak = parseInt(localStorage.getItem('maxStreak')) || 0;
+    let roundCount = 0;
+    let gameHistory = JSON.parse(localStorage.getItem('gameHistory')) || [];
+    let achievements = JSON.parse(localStorage.getItem('achievements')) || {
+      firstWin: false,
+      threeInARow: false,
+      fiveInARow: false,
+      tenInARow: false,
+      masterStrategist: false,
+      spockMaster: false,
+      lizardKing: false
+    };
+
+    // Game rules
+    const rules = {
+      rock: { scissors: 'crushes', lizard: 'crushes' },
+      paper: { rock: 'covers', spock: 'disproves' },
+      scissors: { paper: 'cuts', lizard: 'decapitates' },
+      lizard: { paper: 'eats', spock: 'poisons' },
+      spock: { scissors: 'smashes', rock: 'vaporizes' }
+    };
+
+    // Initialize achievements
+    function initAchievements() {
+      const badges = {
+        firstWin: '🎯',
+        threeInARow: '🎯🎯🎯',
+        fiveInARow: '🌟',
+        tenInARow: '👑',
+        masterStrategist: '🧠',
+        spockMaster: '🖖',
+        lizardKing: '🦎'
+      };
+
+      const container = document.getElementById('achievement-badges');
+      container.innerHTML = '';
+      
+      for (const [achievement, emoji] of Object.entries(badges)) {
+        const badge = document.createElement('div');
+        badge.className = `achievement-badge ${achievements[achievement] ? 'unlocked' : ''}`;
+        badge.innerHTML = emoji;
+        badge.title = achievement.replace(/([A-Z])/g, ' $1').trim();
+        container.appendChild(badge);
+      }
+    }
+
+    // Update game history
+    function updateHistory(userChoice, computerChoice, result) {
+      const historyItem = {
+        userChoice,
+        computerChoice,
+        result,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      
+      gameHistory.unshift(historyItem);
+      if (gameHistory.length > 10) gameHistory.pop();
+      
+      localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
+      
+      const historyContainer = document.getElementById('history');
+      historyContainer.innerHTML = gameHistory.map(item => `
+        <div class="history-item">
+          ${item.timestamp}: You chose ${item.userChoice} vs Computer's ${item.computerChoice} - ${item.result}
+        </div>
+      `).join('');
+    }
+
+    // Check and award achievements
+    function checkAchievements(userChoice, won) {
+      if (won && !achievements.firstWin) {
+        achievements.firstWin = true;
+        showAchievement('First Win! 🎯');
+      }
+      
+      if (winStreak >= 3 && !achievements.threeInARow) {
+        achievements.threeInARow = true;
+        showAchievement('Three in a Row! 🎯🎯🎯');
+      }
+      
+      if (winStreak >= 5 && !achievements.fiveInARow) {
+        achievements.fiveInARow = true;
+        showAchievement('Five in a Row! 🌟');
+      }
+      
+      if (winStreak >= 10 && !achievements.tenInARow) {
+        achievements.tenInARow = true;
+        showAchievement('Perfect Ten! 👑');
+      }
+      
+      if (userChoice === 'spock' && won && !achievements.spockMaster) {
+        achievements.spockMaster = true;
+        showAchievement('Spock Master! 🖖');
+      }
+      
+      if (userChoice === 'lizard' && won && !achievements.lizardKing) {
+        achievements.lizardKing = true;
+        showAchievement('Lizard King! 🦎');
+      }
+      
+      localStorage.setItem('achievements', JSON.stringify(achievements));
+      initAchievements();
+    }
+
+    // Show achievement notification
+    function showAchievement(message) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--accent-color);
+        color: black;
+        padding: 15px 30px;
+        border-radius: 10px;
+        animation: slideDown 0.5s ease-out, fadeOut 0.5s ease-in 2.5s forwards;
+        z-index: 1000;
+      `;
+      notification.textContent = `🏆 Achievement Unlocked: ${message}`;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.remove(), 3000);
+    }
+
+    // Play game sounds
+    function playSound(result) {
+      const sound = document.getElementById(result + 'Sound');
+      if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log('Sound play failed:', e));
+      }
+    }
+
+    // Main game logic
+    function play(userChoice) {
+      const choices = ['rock', 'paper', 'scissors', 'lizard', 'spock'];
+      const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+      let result = '';
+      let won = false;
+
+      // Animate buttons
+      document.querySelectorAll('.btn').forEach(btn => {
+        btn.style.transform = 'scale(0.95)';
+        setTimeout(() => btn.style.transform = '', 200);
+      });
+
+      if (userChoice === computerChoice) {
+        result = `Draw! Both chose ${userChoice}`;
+        playSound('draw');
+      } else {
+        const userWins = rules[userChoice] && rules[userChoice][computerChoice];
+        if (userWins) {
+          userScore++;
+          winStreak++;
+          won = true;
+          result = `You win! ${userChoice} ${userWins} ${computerChoice}!`;
+          playSound('win');
+          
+          if (winStreak > maxStreak) {
+            maxStreak = winStreak;
+            localStorage.setItem('maxStreak', maxStreak);
+          }
+        } else {
+          computerScore++;
+          winStreak = 0;
+          result = `You lose! ${computerChoice} ${rules[computerChoice][userChoice]} ${userChoice}!`;
+          playSound('lose');
+        }
+      }
+
+      roundCount++;
+      updateHistory(userChoice, computerChoice, result);
+      checkAchievements(userChoice, won);
+
+      document.getElementById('result').innerText = result;
+      document.getElementById('score').innerText = `You: ${userScore} | Computer: ${computerScore}`;
+      document.getElementById('streak').innerText = `🔥 Current Streak: ${winStreak}`;
+      document.getElementById('maxStreak').innerText = `🏆 Best Streak: ${maxStreak}`;
+
+      const totalRounds = parseInt(document.getElementById('rounds').value);
+      if (roundCount >= totalRounds) {
+        setTimeout(() => {
+          const finalMessage = userScore > computerScore 
+            ? `🎉 Victory! You won ${userScore}-${computerScore}!` 
+            : computerScore > userScore 
+              ? `💻 Defeat! Computer won ${computerScore}-${userScore}!` 
+              : "🤝 It's a draw!";
+          
+          alert(finalMessage);
+          resetGame();
+        }, 500);
+      }
+    }
+
+    function resetGame() {
+      userScore = 0;
+      computerScore = 0;
+      roundCount = 0;
+      document.getElementById('score').innerText = `You: 0 | Computer: 0`;
+      document.getElementById('result').innerText = 'Choose your weapon!';
+      document.getElementById('streak').innerText = `🔥 Current Streak: ${winStreak}`;
+      document.getElementById('maxStreak').innerText = `🏆 Best Streak: ${maxStreak}`;
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+
+    function showRules() {
+      document.getElementById('rulesModal').style.display = 'block';
+    }
+
+    function hideRules() {
+      document.getElementById('rulesModal').style.display = 'none';
+    }
+
+    // Initialize the game
+    window.onload = function() {
+      initAchievements();
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.toggle-theme input').checked = true;
+      }
+    };
+  </script>
+</body>
+</html>
